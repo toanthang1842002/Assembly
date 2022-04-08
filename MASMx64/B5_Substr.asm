@@ -360,7 +360,7 @@ Itoa proc
 		pop	rsi
 		pop rdx
 		pop rbx
-		add rbp,16
+		add rsp,16
 		mov rsp,rbp
 		pop rbp
 		ret
@@ -369,13 +369,13 @@ Itoa endp
 Push_pos proc
 	push rbp
 	mov rbp,rsp
-	sub rsp,16
+	sub rsp,32
 	mov [rbp-8], rax        ; res_time
 	mov [rbp-16], rdi       ; res
 	push rbx
 	push rdx
 	push rsi
-	mov bl,BYTE PTR [count]
+	mov ebx,count
 	xor rsi,rsi
 		Start_push:
 			xor rdx,rdx
@@ -392,10 +392,10 @@ Push_pos proc
 			inc rbx
 			mov BYTE PTR [rax+rbx],0dh
 			mov count, ebx
-			add rsp,16
 			pop rsi
 			pop rdx
 			pop rbx
+			add rsp,32
 			mov rsp,rbp
 			pop rbp
 			ret
