@@ -19,7 +19,7 @@ zero  db '0',0dh
 
 .data?
 str1 db 100 dup(?)
-str2 db 32 dup(?)
+str2 db 100 dup(?)
 res db 32 dup(?)
 len_res dq 1 dup(?)
 len_time dq 1 dup(?)
@@ -118,7 +118,7 @@ main proc
 	lea r8,SumEven
 	call Addition
 
-	xor rsi,rsi
+	mov esi,amount
 	Start_array:
 		mov rax, iRead
 		mov rcx, STD_IN
@@ -131,8 +131,7 @@ main proc
 		lea rcx,str1
 		call Split_str
 		
-		mov al, BYTE PTR [amount]
-		cmp esi,eax
+		cmp esi,0
 		je  End_Array
 		jmp Start_array
 	
@@ -172,7 +171,7 @@ main proc
 		lea rdx, SumOdd
 		mov r8, len_msg
 		call Print
-
+	Exit:
 		mov rax, iExit
 		mov rcx,0
 		call rax
@@ -396,6 +395,13 @@ Split_str proc
 	xor rax,rax
 	xor rdi,rdi
 	mov rbx,10
+	check_space:
+		cmp byte ptr [rcx+rdi],0dh
+		je End_split
+		cmp byte ptr [rcx+rdi],20h
+		jne  Start_split
+		inc rdi
+		jmp check_space
 	Start_split:
 		cmp BYTE PTR [rcx+rdi],0dh
 		je  change_str
@@ -414,7 +420,7 @@ Split_str proc
 		mov r8,rdi
 		mov r9,rax
 		lea rdi,str2
-		inc rsi
+		dec rsi
 		call Itoa
 		mov rdi,r8
 		mov rax,r9
@@ -476,13 +482,17 @@ Split_str proc
 		jmp Check_split
 
 	Check_split:
+		cmp esi,0
+		je  End_split
+
+	Next_check_split:
 		mov rcx,[rbp-8]
 		cmp BYTE PTR [rdi+rcx],0dh
 		je  End_split
 		inc edi
 		xor rax,rax
 		cmp BYTE PTR [rdi+rcx],20h
-		je  Check_split
+		je  Next_check_split
 		jmp Start_split
 
 	End_split:
