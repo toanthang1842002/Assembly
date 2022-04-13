@@ -18,8 +18,8 @@ checkd   dd  0
 zero  db '0',0dh
 
 .data?
-str1 db 100 dup(?)
-str2 db 100 dup(?)
+str1 db 1000 dup(?)
+str2 db 1000 dup(?)
 res db 32 dup(?)
 len_res dq 1 dup(?)
 len_time dq 1 dup(?)
@@ -434,63 +434,27 @@ Split_str proc
 
 	Even_num:
 		lea rcx,str2
-		call Strlen
-		mov r8,rdx
-		
-		lea rcx,SumEven
-		call Strlen
-		mov r9,rdx
-
-		cmp r8,r9
-		jl  Even_num_2
-
+		lea rdx,SumEven
 		lea r8,SumEven
-		lea r9,str2
-		lea r10,SumEven
-		CALL Sum
+		CALL Addition
 		jmp Check_split
-	Even_num_2:
-		lea r8,SumEven
-		lea r10,str2
-		lea r9,SumEven
-		call Sum
-		jmp Check_split
-		
 	Odd_num:
 		lea rcx,str2
-		call Strlen
-		mov r8,rdx
-		
-		lea rcx,SumOdd
-		call Strlen
-		mov r9,rdx
-
-		cmp r8,r9
-		jl  Odd_num_2
-
+		lea rdx,SumOdd
 		lea r8,SumOdd
-		lea r9,str2
-		lea r10,SumOdd
-		call Sum
-		jmp Check_split
-
-	Odd_num_2:
-		lea r8,SumOdd
-		lea r10,str2
-		lea r9,SumOdd
-		call Sum
+		CALL Addition
 		jmp Check_split
 
 	Check_split:
 		cmp esi,0
 		je  End_split
+		xor rax,rax
+		mov rcx,[rbp-8]
 
 	Next_check_split:
-		mov rcx,[rbp-8]
+		inc edi
 		cmp BYTE PTR [rdi+rcx],0dh
 		je  End_split
-		inc edi
-		xor rax,rax
 		cmp BYTE PTR [rdi+rcx],20h
 		je  Next_check_split
 		jmp Start_split
@@ -509,26 +473,6 @@ Split_str proc
 
 Split_str endp
 
-Sum proc
-	push rbp
-	mov rbp,rsp
-	sub rsp,16
-	mov [rbp-8],r9
-	mov [rbp-16],r10
-	push rcx
-	push rdx
-	mov rcx,[rbp-8]
-	mov rdx,[rbp-16]
-	mov r8,[rbp-24]
-	call Addition
-
-	pop rdx
-	pop rcx
-	mov rsp,rbp
-	pop rbp
-	ret
-	
-Sum endp
 
 Addition proc
 	push rbp
@@ -542,15 +486,34 @@ Addition proc
 	push rsi
 	push rdi
 	push r9
-	xor rax,rax
-	xor rsi,rsi
-	xor rdi,rdi
 	mov r9,1
 	mov rcx,[rbp-8]
 	call Reverse
 	mov rcx,[rbp-16]
 	call Reverse
 	mov rcx,[rbp-8]
+	call Strlen
+	mov rsi,rdx                          ; strlen of string 1
+	mov rcx,[rbp-16]
+	call Strlen
+	mov rdi, rdx                       ; strlen of string 2
+
+	cmp rsi,rdi
+	jg  Prepare_1
+	
+	Prepare_2:
+		mov rcx,[rbp-16]
+		mov rdx,[rbp-8]
+		jmp Skip
+	Prepare_1:
+		mov rcx,[rbp-8]
+		mov rdx,[rbp-16]
+		jmp Skip
+
+	Skip:
+	xor rax,rax
+	xor rsi,rsi
+	xor rdi,rdi
 	Start_add:
 		cmp BYTE PTR [rdx+rsi],0dh
 		je  Next
