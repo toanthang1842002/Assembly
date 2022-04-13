@@ -449,17 +449,17 @@ Split_str proc
 	Check_split:
 		cmp esi,0
 		je  End_split
+		xor rax,rax
+		mov rcx,[rbp-8]
 
 	Next_check_split:
-		mov rcx,[rbp-8]
+		inc edi
 		cmp BYTE PTR [rdi+rcx],0dh
 		je  End_split
-		inc edi
-		xor rax,rax
 		cmp BYTE PTR [rdi+rcx],20h
 		je  Next_check_split
 		jmp Start_split
-
+		
 	End_split:
 		pop r9
 		pop r8
